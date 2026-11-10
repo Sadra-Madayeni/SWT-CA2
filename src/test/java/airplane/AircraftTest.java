@@ -64,6 +64,24 @@ class AircraftTest {
     }
  
     @Test
+    void testPrepareForTakeoff_WhenEngineCheckThrowsException_ShouldRemainGrounded() {
+
+        when(mockEngine.isOperational()).thenThrow(new IllegalStateException("Engine check failed"));
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> aircraft.prepareForTakeoff()
+        );
+
+        assertEquals("Engine check failed", exception.getMessage());
+        assertEquals(FlightStatus.GROUNDED, aircraft.getStatus());
+
+        verify(mockEngine, times(1)).isOperational();
+        verify(mockFuelSystem, never()).hasEnoughFuel();
+        verify(mockNavigationSystem, never()).isRouteAvailable();
+    }
+ 
+    @Test
     void testTakeOff_WhenReady_ShouldStartEngineAndRetractGear() {
    
         when(mockEngine.isOperational()).thenReturn(true);
